@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crafting Calculator</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background-color: #1e1e1e; color: #fff; }
+    h1 { text-align: center; }
+    .container { display: flex; flex-wrap: wrap; gap: 40px; justify-content: center; }
+    .category { border: 1px solid #444; padding: 20px; border-radius: 8px; width: 400px; background-color: #2a2a2a; }
+    .category h2 { text-align: center; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 20px; }
+    .item-input { display: flex; justify-content: space-between; margin-bottom: 10px; }
+    input[type='number'] { width: 60px; background-color: #111; color: #fff; border: 1px solid #555; padding: 5px; border-radius: 4px; }
+    button { margin-top: 20px; width: 100%; padding: 10px; background-color: #2563eb; color: #fff; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+    table { width: 100%; margin-top: 30px; border-collapse: collapse; }
+    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #444; }
+    th { background-color: #333; }
+  </style>
+</head>
+<body>
+  <h1>Crafting Calculator</h1>
+  <div class="container">
+    <div class="category" id="weapons">
+      <h2>Weapons & Ammo</h2>
+    </div>
+    <div class="category" id="blueprints">
+      <h2>Blueprints</h2>
+    </div>
+  </div>
+
+  <button onclick="calculateAllMaterials()">Calculate</button>
+
+  <table id="resultTable">
+    <thead>
+      <tr>
+        <th>Material</th>
+        <th>Amount Needed</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const blueprints = {
+      "tanglockblueprint": [ { "item": "bp_paper", "amount": 9 }, { "item": "bp_ink", "amount": 1 } ],
+      "m9blueprint": [ { "item": "bp_paper", "amount": 7 }, { "item": "bp_ink", "amount": 1 } ],
+      "fnx45 Blueprint": [ { "item": "bp_paper", "amount": 10 }, { "item": "bp_ink", "amount": 1 } ],
+      "blueglock blueprint": [ { "item": "bp_paper", "amount": 15 }, { "item": "bp_ink", "amount": 1 } ],
+      "mgglock_blueprint": [ { "item": "bp_paper", "amount": 13 }, { "item": "bp_ink", "amount": 1 } ],
+      "glock21 blueprint": [ { "item": "bp_paper", "amount": 15 }, { "item": "bp_ink", "amount": 1 } ],
+      "glockbeam blueprint": [ { "item": "bp_paper", "amount": 18 }, { "item": "bp_ink", "amount": 1 } ],
+      "illglock17blueprint": [ { "item": "bp_paper", "amount": 10 }, { "item": "bp_ink", "amount": 1 } ],
+      "deblueprint": [ { "item": "bp_paper", "amount": 20 }, { "item": "bp_ink", "amount": 1 } ]
+    };
+
+    const crafting = {
+      "blueglocks": [ { "item": "iron", "amount": 120 }, { "item": "copper", "amount": 110 }, { "item": "steel", "amount": 115 }, { "item": "blueglock_blueprint", "amount": 1 } ],
+      "tglock19": [ { "item": "tanglock19_blueprint", "amount": 1 }, { "item": "iron", "amount": 40 }, { "item": "aluminum", "amount": 60 }, { "item": "steel", "amount": 40 } ],
+      "de": [ { "item": "iron", "amount": 90 }, { "item": "aluminum", "amount": 100 }, { "item": "de_blueprint", "amount": 1 }, { "item": "steel", "amount": 80 } ],
+      "m9": [ { "item": "iron", "amount": 60 }, { "item": "aluminum", "amount": 70 }, { "item": "m9_blueprint", "amount": 1 }, { "item": "steel", "amount": 50 } ],
+      "mgglock": [ { "item": "iron", "amount": 75 }, { "item": "aluminum", "amount": 80 }, { "item": "mgglock_blueprint", "amount": 1 }, { "item": "steel", "amount": 65 } ],
+      "glock21": [ { "item": "iron", "amount": 80 }, { "item": "aluminum", "amount": 85 }, { "item": "glock21_blueprint", "amount": 1 }, { "item": "steel", "amount": 70 } ],
+      "glockbeams": [ { "item": "iron", "amount": 85 }, { "item": "aluminum", "amount": 90 }, { "item": "glockbeam_blueprint", "amount": 1 }, { "item": "steel", "amount": 75 } ],
+      "illglock17": [ { "item": "iron", "amount": 70 }, { "item": "aluminum", "amount": 75 }, { "item": "illglock17_blueprint", "amount": 1 }, { "item": "steel", "amount": 60 } ],
+      "fnx45": [ { "item": "iron", "amount": 85 }, { "item": "aluminum", "amount": 80 }, { "item": "fnx45_blueprint", "amount": 1 }, { "item": "steel", "amount": 70 } ],
+      "katana": [ { "item": "iron", "amount": 10 }, { "item": "rubber", "amount": 15 }, { "item": "steel", "amount": 10 } ],
+      "sledgehammer": [ { "item": "iron", "amount": 15 }, { "item": "rubber", "amount": 20 }, { "item": "steel", "amount": 12 } ],
+      "perforator": [ { "item": "iron", "amount": 8 }, { "item": "rubber", "amount": 10 }, { "item": "steel", "amount": 6 } ],
+      "karmabitknife": [ { "item": "iron", "amount": 15 }, { "item": "rubber", "amount": 10 }, { "item": "steel", "amount": 10 } ],
+      "shiv": [ { "item": "iron", "amount": 5 }, { "item": "rubber", "amount": 8 }, { "item": "steel", "amount": 4 } ],
+      "chair": [ { "item": "iron", "amount": 8 }, { "item": "rubber", "amount": 7 }, { "item": "steel", "amount": 6 } ],
+      "ammobox9mm": [ { "item": "bulletcasing", "amount": 10 }, { "item": "gunpowder", "amount": 10 }, { "item": "copper", "amount": 10 } ],
+      "ammobox45": [ { "item": "bulletcasing", "amount": 10 }, { "item": "gunpowder", "amount": 10 }, { "item": "steel", "amount": 10 } ],
+      "ammobox50": [ { "item": "bulletcasing", "amount": 10 }, { "item": "gunpowder", "amount": 10 }, { "item": "steel", "amount": 10 } ],
+      "rifleammobox": [ { "item": "bulletcasing", "amount": 10 }, { "item": "gunpowder", "amount": 10 }, { "item": "copper", "amount": 25 } ],
+      "rifle2ammobox": [ { "item": "bulletcasing", "amount": 10 }, { "item": "gunpowder", "amount": 10 }, { "item": "copper", "amount": 20 } ]
+    };
+
+    function generateInputs(data, containerId) {
+      const container = document.getElementById(containerId);
+      for (const key in data) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'item-input';
+        wrapper.innerHTML = `
+          <label for="${key}">${key}</label>
+          <input type="number" id="${key}" min="0" value="0">
+        `;
+        container.appendChild(wrapper);
+      }
+    }
+
+    function calculateAllMaterials() {
+      const allData = { ...crafting, ...blueprints };
+      const totals = {};
+
+      for (const item in allData) {
+        const qty = parseInt(document.getElementById(item)?.value || 0);
+        if (qty > 0) {
+          allData[item].forEach(({ item: mat, amount }) => {
+            totals[mat] = (totals[mat] || 0) + amount * qty;
+          });
+        }
+      }
+
+      const resultTableBody = document.querySelector("#resultTable tbody");
+      resultTableBody.innerHTML = "";
+      for (const mat in totals) {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${mat}</td><td>${totals[mat]}</td>`;
+        resultTableBody.appendChild(row);
+      }
+    }
+
+    generateInputs(crafting, 'weapons');
+    generateInputs(blueprints, 'blueprints');
+  </script>
+</body>
+</html>
