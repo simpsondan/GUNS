@@ -111,6 +111,21 @@
         resultTableBody.appendChild(row);
       }
     }
+  <div id="breakdownResult" style="margin-top: 40px;">
+    <h2>Breakdown Calculator (Tanglocks at $18,000 each)</h2>
+    <table id="breakdownTable">
+      <thead>
+        <tr>
+          <th>Material</th>
+          <th>Needed</th>
+          <th>From Tanglocks</th>
+          <th>Difference</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <p id="tanglockCount" style="margin-top: 10px;"></p>
+  </div>
 
     generateInputs(crafting, 'weapons');
     generateInputs(blueprints, 'blueprints');
