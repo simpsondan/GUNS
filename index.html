@@ -6,10 +6,10 @@
   <title>Crafting Calculator</title>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; background-color: #1e1e1e; color: #fff; }
-    h1 { text-align: center; }
+    h1, h2 { text-align: center; }
     .container { display: flex; flex-wrap: wrap; gap: 40px; justify-content: center; }
     .category { border: 1px solid #444; padding: 20px; border-radius: 8px; width: 400px; background-color: #2a2a2a; }
-    .category h2 { text-align: center; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 20px; }
+    .category h2 { border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 20px; }
     .item-input { display: flex; justify-content: space-between; margin-bottom: 10px; }
     input[type='number'] { width: 60px; background-color: #111; color: #fff; border: 1px solid #555; padding: 5px; border-radius: 4px; }
     button { margin-top: 20px; width: 100%; padding: 10px; background-color: #2563eb; color: #fff; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
@@ -40,6 +40,22 @@
     </thead>
     <tbody></tbody>
   </table>
+
+  <div id="breakdownResult" style="margin-top: 40px;">
+    <h2>Breakdown Calculator (Tanglocks at $18,000 each)</h2>
+    <table id="breakdownTable">
+      <thead>
+        <tr>
+          <th>Material</th>
+          <th>Needed</th>
+          <th>From Tanglocks</th>
+          <th>Difference</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <p id="tanglockCount" style="margin-top: 10px;"></p>
+  </div>
 
   <script>
     const blueprints = {
@@ -110,22 +126,46 @@
         row.innerHTML = `<td>${mat}</td><td>${totals[mat]}</td>`;
         resultTableBody.appendChild(row);
       }
+
+      calculateTanglockBreakdown(totals);
     }
-  <div id="breakdownResult" style="margin-top: 40px;">
-    <h2>Breakdown Calculator (Tanglocks at $18,000 each)</h2>
-    <table id="breakdownTable">
-      <thead>
-        <tr>
-          <th>Material</th>
-          <th>Needed</th>
-          <th>From Tanglocks</th>
-          <th>Difference</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <p id="tanglockCount" style="margin-top: 10px;"></p>
-  </div>
+
+    function calculateTanglockBreakdown(totals) {
+      const tanglockYield = { aluminum: 60, steel: 40, iron: 40 };
+      let requiredTanglocks = 0;
+      const requirements = {};
+
+      for (const mat in tanglockYield) {
+        if (totals[mat]) {
+          const needed = totals[mat];
+          const perTanglock = tanglockYield[mat];
+          const tanglocks = Math.ceil(needed / perTanglock);
+          requirements[mat] = tanglocks;
+        }
+      }
+
+      requiredTanglocks = Math.max(...Object.values(requirements));
+      const breakdownTableBody = document.querySelector("#breakdownTable tbody");
+      breakdownTableBody.innerHTML = "";
+
+      for (const mat in tanglockYield) {
+        const fromTanglocks = requiredTanglocks * tanglockYield[mat];
+        const needed = totals[mat] || 0;
+        const diff = fromTanglocks - needed;
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${mat}</td>
+          <td>${needed}</td>
+          <td>${fromTanglocks}</td>
+          <td style="color:${diff < 0 ? 'red' : 'lightgreen'};">${diff}</td>
+        `;
+        breakdownTableBody.appendChild(row);
+      }
+
+      document.getElementById("tanglockCount").innerText =
+        `Total Tanglocks Needed: ${requiredTanglocks} (~$${requiredTanglocks * 18000} total value)`;
+    }
 
     generateInputs(crafting, 'weapons');
     generateInputs(blueprints, 'blueprints');
